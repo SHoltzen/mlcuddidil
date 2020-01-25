@@ -936,6 +936,42 @@ value camlidl_cudd_abdd_permute(bool bdd, value _v_no, value _v_permut)
   CAMLreturn(_vres);
 }
 
+/**
+   Some decent docs on how to do this: https://ocaml.org/learn/tutorials/calling_c_libraries.html
+   bdd: true if the argument is a BDD, false if it's an ADD
+    _v_no: input BDD node
+    _v_swap_a and _v_swap_b: variables to be swapped in _v_no
+ */
+value camlidl_cudd_bdd_swapvariables(value _v_no, value _v_swap_a, value _v_swap_b)
+{
+  // tell the ocaml GC not to collect these arguments
+  CAMLparam3(_v_no, _v_swap_a, _v_swap_b);
+  CAMLlocal1(_vres);
+  bdd__t no; // 'no' is short for 'node' in this codebase
+  bdd__t _res;
+
+  camlidl_cudd_node_ml2c(_v_no, &no);
+  int sizeA = Wosize_val(_v_swap_a);
+  int sizeB = Wosize_val(_v_swap_b);
+  DdNode** swapA = malloc(sizeA * sizeof(DdNode*));
+  DdNode** swapB = malloc(sizeB * sizeof(DdNode*));
+  for (int i=0; i < sizeA; i++) {
+    value a = Field(_v_swap_a, i);
+    value b = Field(_v_swap_b, i);
+    swapA[i] = Cudd_bddIthVar(no.man->man, Int_val(a));
+    swapB[i] = Cudd_bddIthVar(no.man->man, Int_val(b));
+  }
+
+  _res.man = no.man;
+  _res.node = Cudd_bddSwapVariables(no.man->man,no.node,swapA,swapB,sizeA);
+  _vres = camlidl_cudd_bdd_c2ml(&_res);
+  free(swapA);
+  free(swapB);
+  CAMLreturn(_vres);
+}
+
+
+
 value camlidl_cudd_bdd_permute_memo(value _v_memo, value _v_no, value _v_permut)
 { return camlidl_cudd_abdd_permute_memo(true,_v_memo,_v_no,_v_permut); }
 value camlidl_cudd_add_permute_memo(value _v_memo, value _v_no, value _v_permut)
