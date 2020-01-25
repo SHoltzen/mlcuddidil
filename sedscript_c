@@ -1,0 +1,15 @@
+1 a\
+/* This file is part of the MLCUDDIDL Library, released under LGPL license.\
+\ \ \ Please read the COPYING file packaged in the distribution  */
+# NB: Pfff... Sed BSD limitation...
+# s/camlidl_\(ml2c\|c2ml\|transl\|man\|hash\|cache\|bdd\|add\|zdd\|vdd\)/camlidl_cudd_\1/g;  
+s/camlidl_ml2c/camlidl_cudd_ml2c/g;
+s/camlidl_c2ml/camlidl_cudd_c2ml/g;
+s/camlidl_transl/camlidl_cudd_transl/g;
+s/camlidl_man/camlidl_cudd_man/g;
+s/camlidl_hash/camlidl_cudd_hash/g;
+s/camlidl_cache/camlidl_cudd_cache/g;
+s/camlidl_bdd/camlidl_cudd_bdd/g;
+s/camlidl_add/camlidl_cudd_add/g;
+s/camlidl_zdd/camlidl_cudd_zdd/g;
+s/camlidl_vdd/camlidl_cudd_vdd/g;

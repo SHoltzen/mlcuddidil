@@ -1,0 +1,175 @@
+#!/bin/sh
+
+# ------------------------------------------------------------------------------
+# data
+
+cudddir="cudd-3.0.0";
+
+# defaults
+
+prefix="/usr/local";
+enable_prof=yes;
+force_prof=no;
+
+# usage
+
+usage () {
+    cat <<EOF
+usage: $0 [options]
+where available options are:
+  --prefix <prefix>  Specify installation prefix directory
+                     ("$prefix" by default)
+  --docdir <docdir>  Specify documentation installation directory
+                     ("\$prefix/share/doc" by default)
+  --{enable|disable}-profiling
+                     Enable/disable compilation of profiling version
+                     (enabled by default, when OCaml supports it)
+  --help             Display this help and exit
+EOF
+    exit 0
+}
+
+# ---
+
+info () {
+    if test "x$1" = "x-n"; then
+	shift;
+	echo "$@" | tr -d '\012' 1>&2;
+    else
+	echo "$@" 1>&2;
+    fi
+}
+warn () { echo "$@" 1>&2; return 0; }
+err () { echo "$@" 1>&2; exit 1; }
+arr () { echo "Missing argument for \`$1'!" 1>&2; usage; exit 1; }
+arg () { test "x$2" != "x" && echo "$2" || arr "$1"; }
+drg () { d="$(arg "$@")"; test -d "$d" && echo "$d" || \
+		 err "Argument for \`$1' should be an existing directory!"; }
+
+# arg. parsing
+
+while test $# '>' 0; do
+    case "$1" in
+	--prefix) prefix="$(arg "$1" "$2")"; shift; shift;;
+	--enable-profiling) enable_prof=yes; force_prof=yes; shift;;
+	--disable-profiling) enable_prof=no; force_prof=no;  shift;;
+	-h | --help) usage;;
+	*) warn "Ignoring argument \`$1'!"; shift;;
+    esac;
+done;
+
+# ---
+
+# ( cd "${cudddir}" && ./configure --prefix "${prefix}"; )
+
+out () { echo "$*"; return 0; }
+assign () { eval "$1=\"$2\""; out "$1 = $2"; }
+test_cmd () { command -v $1 >/dev/null; }
+find_cmd () {
+    v="$1"; shift;
+    test $# \< 1 && return 1;
+    if test "x$1" = "x"; then
+	shift; find_cmd "$v" "$@";
+    else
+	info -n "checking for $1... ";
+	if test_cmd $1; then
+	    cmd=$(command -v $1);
+	    test "x$v" != "x_" && assign "$v" "$cmd";
+	    info "yes ($cmd)";
+	else
+	    info "no";
+	    shift; find_cmd "$v" "$@";
+	fi;
+    fi;
+}
+find_xcmd () {
+    find_cmd "$@" || {
+	shift;
+	err "one of [$@] is required";
+    }
+}
+find_ocmd () { find_xcmd "$1" "$2.opt" "$2"; }
+
+exec 1>"Makefile.config";
+cat Makefile.config.in;
+
+# General Utilities
+
+find_xcmd _ mktemp;
+find_xcmd AR ar;
+find_xcmd RANLIB ranlib;
+find_xcmd SED gsed sed;
+find_xcmd M4 gm4 m4;
+find_xcmd AWK awk;
+
+# OCaml
+
+find_ocmd OCAMLC ocamlc;
+
+overs=$(${OCAMLC} -version);
+case "${overs}" in
+    [1-3].* | 4.01.*)
+	err "OCaml version found is ${overs}: OCaml >= 4.02 is required.";;
+    *)
+	:;;
+esac
+
+find_ocmd OCAMLOPT ocamlopt;
+find_ocmd OCAMLDEP ocamldep;
+find_ocmd OCAMLDOC ocamldoc;
+find_ocmd OCAMLMKLIB ocamlmklib;
+find_xcmd OCAMLFIND ocamlfind;
+find_xcmd CAMLIDL camlidl;
+
+# C
+
+check_compile_args () {
+    tmpdir=$(mktemp -d tmp.XXXXXX);
+    trap "cd $(pwd); rm -r -f \"${tmpdir}\";" EXIT QUIT INT TERM;
+    (
+	cd "${tmpdir}";
+	echo "int main() { return 1; }" > tmp.c;
+	${OCAMLFIND} ocamlopt -ccopt "$*" -c tmp.c >/dev/null 2>&1 || \
+	    err "not working!";
+	${CC} tmp.o -o a.out >/dev/null 2>&1 || \
+	    err "not working!";
+	info "working";
+    ) && rm -r -f "${tmpdir}";
+}
+
+find_xcmd CC "$CC" gcc clang;
+find_xcmd CXX "$CXX" g++ clang++;
+
+info -n "Checking compilation of C file with ocamlopt: "
+check_compile_args;
+
+_enable_prof="";
+if test "x${enable_prof}" = "xyes"; then
+    cprof_flags="$(${OCAMLC} -config | ${SED} -e '/^cc_profile:/!d; s/^[^:]*: *//;')";
+    if test "x${cprof_flags}" != "x" -o "x${force_prof}" = "xyes"; then
+	info "Profiling flags found: ${cprof_flags}";
+	info -n "Checking compilation of C file with ocamlopt -ccopt \"${cprof_flags}\": "
+	if check_compile_args "${cprof_flags}"; then
+	    info "Profiling-enabled version will be built";
+	    echo "CPROF_FLAGS = ${cprof_flags}";
+	    _enable_prof=yes;
+	else
+	    warn "Profiling-enabled version will not be built";
+	fi;
+    else
+	warn "Profiling-enabled version will not be built as no specific flag was found";
+    fi;
+else
+    info "Profiling-enabled version will not be built (as requested)";
+fi;
+echo "ENABLE_PROF = ${_enable_prof}";	# in case...
+
+if test "x${AWK}" != "x"; then
+    info "awk found: documentation will be built";
+    echo "OCAMLPACK = ./ocamlpack";
+else
+    warn "awk not found: documentation will not be built";
+fi;
+
+# NB: Ugly hack to avoid weird errors with auto{conf,make} and the likes:
+( cd "${cudddir}" && touch configure.ac aclocal.m4 configure Makefile.am Makefile.in config.h.in; )

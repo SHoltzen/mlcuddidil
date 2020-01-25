@@ -1,0 +1,42 @@
+# -*- mode: makefile -*-
+
+######################################################################
+# HAS Flags
+######################################################################
+
+# If defined to non-empty value, generates dynamic libraries.
+# Do not forget to add -fPIC to CFLAGS and CFLAGS_DEBUG.
+
+HAS_SHARED=0
+
+######################################################################
+# Directories
+######################################################################
+
+# mlcuddidl is installed with ocamlfind as the package "cudd"
+# The installation directory is thus $(shell ocamlfind printconf destdir)/cudd
+CAML_DIR = $(shell ocamlc -where)
+CAMLIDL_DIR = $(shell ocamlfind query camlidl)
+
+######################################################################
+# Tools and Flags
+######################################################################
+
+# ocamlc compilation flags
+OCAMLFLAGS = -annot
+# ocamlopt compilation flags
+OCAMLOPTFLAGS = -annot -inline 20
+
+# C compiler
+CC ?= gcc
+
+# Other
+LATEX=latex
+DVIPS=dvips
+DVIPDF=dvipdf
+MAKEINDEX=makeindex
+
+######################################################################
+# Found by configure script
+######################################################################
+
