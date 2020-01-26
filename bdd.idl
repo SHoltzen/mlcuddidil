@@ -435,6 +435,17 @@ let permute ?memo bdd permut =
       _permute bdd permut
 ")
 
+quote(ML,"
+(** Swaps variables between the two arrays *)
+external swapvariables : 'a t -> int array -> int array -> 'a t
+  = \"camlidl_cudd_bdd_swapvariables\"")
+
+quote(MLI,"
+(** Swaps variables between the two arrays *)
+external swapvariables : 'a t -> int array -> int array -> 'a t
+  = \"camlidl_cudd_bdd_swapvariables\"")
+
+
 /* ====================================================================== */
 /* Iterators */
 /* ====================================================================== */
