@@ -938,7 +938,6 @@ value camlidl_cudd_abdd_permute(bool bdd, value _v_no, value _v_permut)
 
 /**
    Some decent docs on how to do this: https://ocaml.org/learn/tutorials/calling_c_libraries.html
-   bdd: true if the argument is a BDD, false if it's an ADD
     _v_no: input BDD node
     _v_swap_a and _v_swap_b: variables to be swapped in _v_no
  */
@@ -970,6 +969,43 @@ value camlidl_cudd_bdd_swapvariables(value _v_no, value _v_swap_a, value _v_swap
   CAMLreturn(_vres);
 }
 
+/**
+   _v_input: input BDD node
+   _v_compose: BDDs to compose
+   _v_positions: an array of integers specifying the index that each
+                 BDD in _v_compose will be composed for in _v_input
+*/
+value camlidl_cudd_bdd_labeled_vectorcompose(value _v_input, value _v_compose, value _v_positions)
+{
+  // tell the ocaml GC not to collect these arguments
+  CAMLparam3(_v_input, _v_compose, _v_positions);
+  CAMLlocal1(_vres);
+  bdd__t no; // 'no' is short for 'node' in this codebase
+  bdd__t _res;
+
+  camlidl_cudd_node_ml2c(_v_input, &no);
+  int numVars = Cudd_ReadSize(no.man->man);
+  DdNode** composeVec = malloc(numVars * sizeof(DdNode*));
+  // copy the manager's projection array
+  for (int i=0; i < numVars; i++) {
+    composeVec[i] = Cudd_bddIthVar(no.man->man, i);
+  }
+  // now set the projections that are specified by _v_positions
+  int size = Wosize_val(_v_compose);
+  for (int i=0; i < size; i++) {
+    value p = Int_val(Field(_v_positions, i));
+    value node = Field(_v_compose, i);
+    bdd__t swapno;
+    camlidl_cudd_node_ml2c(node, &no);
+    composeVec[p] = swapno.node;
+  }
+
+  _res.man = no.man;
+  _res.node = Cudd_bddVectorCompose(no.man->man,no.node,composeVec);
+  _vres = camlidl_cudd_bdd_c2ml(&_res);
+  free(composeVec);
+  CAMLreturn(_vres);
+}
 
 
 value camlidl_cudd_bdd_permute_memo(value _v_memo, value _v_no, value _v_permut)
