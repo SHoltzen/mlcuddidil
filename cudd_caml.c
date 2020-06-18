@@ -989,7 +989,7 @@ value camlidl_cudd_bdd_labeled_vectorcompose(value _v_input, value _v_compose, v
   DdNode** composeVec = malloc(numVars * sizeof(DdNode*));
   // copy the manager's projection array
   for (int i=0; i < numVars; i++) {
-    printf("init %d\n" i);
+    printf("init %d\n", i);
     composeVec[i] = Cudd_bddIthVar(no.man->man, i);
   }
   // now set the projections that are specified by _v_positions
