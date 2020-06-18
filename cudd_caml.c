@@ -977,7 +977,6 @@ value camlidl_cudd_bdd_swapvariables(value _v_no, value _v_swap_a, value _v_swap
 */
 value camlidl_cudd_bdd_labeled_vectorcompose(value _v_input, value _v_compose, value _v_positions)
 {
-  printf("0 Made it here\n");
   // tell the ocaml GC not to collect these arguments
   CAMLparam3(_v_input, _v_compose, _v_positions);
   CAMLlocal1(_vres);
@@ -986,13 +985,11 @@ value camlidl_cudd_bdd_labeled_vectorcompose(value _v_input, value _v_compose, v
 
   camlidl_cudd_node_ml2c(_v_input, &no);
   int numVars = Cudd_ReadSize(no.man->man);
-  printf("1 Made it here\n");
   DdNode** composeVec = malloc(numVars * sizeof(DdNode*));
   // copy the manager's projection array
   for (int i=0; i < numVars; i++) {
     composeVec[i] = Cudd_bddIthVar(no.man->man, i);
   }
-  printf("2 Made it here\n");
   // now set the projections that are specified by _v_positions
   int size = Wosize_val(_v_compose);
   for (int i=0; i < size; i++) {
@@ -1001,14 +998,13 @@ value camlidl_cudd_bdd_labeled_vectorcompose(value _v_input, value _v_compose, v
     bdd__t swapno;
     camlidl_cudd_node_ml2c(node, &no);
     composeVec[p] = swapno.node;
+    printf("swapping %d for %d\n", p, Cudd_ReadIndex(swapno.node));
   }
-  printf("3 Made it here\n");
 
   _res.man = no.man;
   _res.node = Cudd_bddVectorCompose(no.man->man,no.node,composeVec);
   _vres = camlidl_cudd_bdd_c2ml(&_res);
   free(composeVec);
-  printf("4 Made it here\n");
   CAMLreturn(_vres);
 }
 
