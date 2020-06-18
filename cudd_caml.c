@@ -998,7 +998,6 @@ value camlidl_cudd_bdd_labeled_vectorcompose(value _v_input, value _v_compose, v
     bdd__t swapno;
     camlidl_cudd_node_ml2c(node, &swapno);
     composeVec[p] = swapno.node;
-    printf("swapping %d for %d\n", p, Cudd_NodeReadIndex(swapno.node));
   }
 
   _res.man = no.man;
