@@ -994,7 +994,7 @@ value camlidl_cudd_bdd_labeled_vectorcompose(value _v_input, value _v_compose, v
   int size = Wosize_val(_v_compose);
   for (int i=0; i < size; i++) {
     value p = Int_val(Field(_v_positions, i));
-    value node = Field(_v_compose, i);
+    value node = Field(_v_positions, i);
     bdd__t swapno;
     camlidl_cudd_node_ml2c(node, &swapno);
     composeVec[p] = swapno.node;
