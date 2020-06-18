@@ -977,6 +977,7 @@ value camlidl_cudd_bdd_swapvariables(value _v_no, value _v_swap_a, value _v_swap
 */
 value camlidl_cudd_bdd_labeled_vectorcompose(value _v_input, value _v_compose, value _v_positions)
 {
+  printf("0 Made it here\n");
   // tell the ocaml GC not to collect these arguments
   CAMLparam3(_v_input, _v_compose, _v_positions);
   CAMLlocal1(_vres);
