@@ -448,12 +448,12 @@ external swapvariables : 'a t -> int array -> int array -> 'a t
 quote(ML,"
 (** Swaps variables between the two arrays *)
 external labeled_vector_compose : 'a t -> 'a t array -> int array -> 'a t
-  = \"camlidl_cudd_bdd_swapvariables\"")
+  = \"camlidl_cudd_bdd_labeled_vectorcompose\"")
 
 quote(MLI,"
 (** Swaps variables between the two arrays *)
 external labeled_vector_compose : 'a t -> 'a t array -> int array -> 'a t
-  = \"camlidl_cudd_bdd_swapvariables\"")
+  = \"camlidl_cudd_bdd_labeled_vectorcompose\"")
 
 
 /* ====================================================================== */
