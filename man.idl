@@ -402,10 +402,10 @@ quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_SetM
 void   set_max_live(man__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetMaxLive);
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_ReadMaxMemory}[Cudd_ReadMaxMemory]}. *)")
-int    get_max_mem(man__t man) VAL_OF_MAN(Cudd_ReadMaxMemory);
+[int64] long get_max_mem(man__t man) VAL_OF_MAN(Cudd_ReadMaxMemory);
 
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_SetMaxMemory}[Cudd_SetMaxMemory]}. *)")
-void   set_max_mem(man__t man, int v) UNIT_OF_MAN_VAL(Cudd_SetMaxMemory);
+void   set_max_mem(man__t man, [int64] long v) UNIT_OF_MAN_VAL(Cudd_SetMaxMemory);
 
 quote(MLMLI,"\n")
 quote(MLMLI,"(*  ------------------------------------------------------ *)")

@@ -1,6 +1,6 @@
 include Makefile.config
 PKGNAME = mlcuddidl
-PKGVERS = 3.0.4
+PKGVERS = 3.0.6
 
 #---------------------------------------
 # Directories
@@ -344,7 +344,7 @@ endif
 ifneq ($(OPAM_DIST_DIR),)
 
   OPAM_DIR = opam
-  OPAM_FILES = descr opam files
+  OPAM_FILES = descr opam
 
   MLSRCS = $(filter-out $(IDLMODULES),$(MLMODULES))
   DIST_FILES = *.idl *.c *.h *.itarget *.odoci *.mlpack *.mlpacki	\

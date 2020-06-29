@@ -134,15 +134,14 @@ value camlidl_bdd_$1(value _v_no)
     a.man = b.man = no.man;
     a.node = tab[0];
     b.node = tab[1];
-    cuddDeref(a.node);
     _v_a = camlidl_cudd_bdd_c2ml(&a);
-    cuddDeref(b.node);
+    cuddDeref(a.node);
     _v_b = camlidl_cudd_bdd_c2ml(&b);
-    _v_pair = alloc_small(0,2);
+    cuddDeref(b.node);
+    _v_pair = caml_alloc_tuple(2);
     Field(_v_pair,0) = _v_a;
     Field(_v_pair,1) = _v_b;
-    _v_res = alloc_small(0,1);
-    Field(_v_res,0) = _v_pair;
+    _v_res = caml_alloc_boxed(_v_pair);
     free(tab);
     break;
   }

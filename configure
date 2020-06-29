@@ -145,19 +145,27 @@ check_compile_args;
 
 _enable_prof="";
 if test "x${enable_prof}" = "xyes"; then
-    cprof_flags="$(${OCAMLC} -config | ${SED} -e '/^cc_profile:/!d; s/^[^:]*: *//;')";
-    if test "x${cprof_flags}" != "x" -o "x${force_prof}" = "xyes"; then
-	info "Profiling flags found: ${cprof_flags}";
-	info -n "Checking compilation of C file with ocamlopt -ccopt \"${cprof_flags}\": "
-	if check_compile_args "${cprof_flags}"; then
-	    info "Profiling-enabled version will be built";
-	    echo "CPROF_FLAGS = ${cprof_flags}";
-	    _enable_prof=yes;
-	else
-	    warn "Profiling-enabled version will not be built";
-	fi;
+    # TEMPORARY: Always disable profiling when compiling with
+    # Apple LLVM >= 10.0.0 (see
+    # `https://stackoverflow.com/a/52883957/1928149')
+    if "$CC" --version | grep -q 'clang-[1-9][0-9][0-9][0-9]' && \
+	    "${OCAMLC}" -config | grep -q '-apple-darwin18.7.'; then
+	warn "Profiling is (temporarily) disabled with these versions of Apple LLVM/Darwin.";
     else
-	warn "Profiling-enabled version will not be built as no specific flag was found";
+	cprof_flags="$(${OCAMLC} -config | ${SED} -e '/^cc_profile:/!d; s/^[^:]*: *//;')";
+	if test "x${cprof_flags}" != "x" -o "x${force_prof}" = "xyes"; then
+	    info "Profiling flags found: ${cprof_flags}";
+	    info -n "Checking compilation of C file with ocamlopt -ccopt \"${cprof_flags}\": "
+	    if check_compile_args "${cprof_flags}"; then
+		info "Profiling-enabled version will be built";
+		echo "CPROF_FLAGS = ${cprof_flags}";
+		_enable_prof=yes;
+	    else
+		warn "Profiling-enabled version will not be built";
+	    fi;
+	else
+	    warn "Profiling-enabled version will not be built as no specific flag was found";
+	fi;
     fi;
 else
     info "Profiling-enabled version will not be built (as requested)";
