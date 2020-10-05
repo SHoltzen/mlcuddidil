@@ -3212,3 +3212,11 @@ See the CUDD Programmer's Guide for additional details.");
     abort();
 
 } /* end of ddReportRefMess */
+
+
+#ifdef DD_COUNT
+double
+Cudd_recursiveCalls(DdManager *unique) {
+  return unique->recursiveCalls;
+}
+#endif

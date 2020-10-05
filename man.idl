@@ -584,3 +584,10 @@ quote(ML,"
 let _ = set_gc 1000000 Gc.full_major (fun () -> ())
 let _ = Callback.register_exception \"invalid argument exception\" (Invalid_argument \"\")
 ")
+
+
+
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_ReadPerm}[Cudd_ReadPerm]}. Returns the level of the variable (its order in the BDD) *)")
+  double num_recursive_calls(man__t man)
+  quote(call, "_res = Cudd_recursiveCalls(man->man);");
+

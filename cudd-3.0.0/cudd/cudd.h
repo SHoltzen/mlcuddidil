@@ -503,6 +503,10 @@ typedef void (*DD_TOHFP)(DdManager *, void *);
 extern "C" {
 #endif
 
+
+#ifdef DD_COUNT
+extern double Cudd_recursiveCalls(DdManager *dd);
+#endif
 extern DdNode * Cudd_addNewVar(DdManager *dd);
 extern DdNode * Cudd_addNewVarAtLevel(DdManager *dd, int level);
 extern DdNode * Cudd_bddNewVar(DdManager *dd);
