@@ -3602,6 +3602,123 @@ ddCountPathAux(
 } /* end of ddCountPathAux */
 
 
+
+double
+ddWmcAux(
+      DdManager* man,
+      DdNode * node,
+      double * weights,
+      st_table * table)
+{
+
+
+  DdNode	*Nv, *Nnv;
+  double	paths, *ppaths, paths1, paths2;
+  void	*dummy;
+
+  DdNode * reg = Cudd_Regular(node);
+  DdNode *one = DD_ONE(man);
+
+  if (node == one) {
+    return(1.0);
+  }
+  if (node == Cudd_Not(one)) {
+    return 0.0;
+  }
+  if (st_lookup(table, node, &dummy)) {
+    paths = *(double *) dummy;
+    return(paths);
+  }
+
+  Nv = cuddT(reg); Nnv = cuddE(reg);
+  if (Cudd_IsComplement(node)) {
+    Nv = Cudd_Not(Nv);
+    Nnv = Cudd_Not(Nnv);
+  }
+
+  paths1 = ddWmcAux(man,Nv,weights,table);
+  if (paths1 == (double)CUDD_OUT_OF_MEM) return((double)CUDD_OUT_OF_MEM);
+  paths2 = ddWmcAux(man,Nnv,weights,table);
+  if (paths2 == (double)CUDD_OUT_OF_MEM) return((double)CUDD_OUT_OF_MEM);
+  double curWeight = weights[Cudd_NodeReadIndex(reg)];
+  paths = (curWeight * paths2) + ((1.0 - curWeight) * paths1);
+
+  /* paths = paths1 + paths2; */
+
+  ppaths = ALLOC(double,1);
+  if (ppaths == NULL) {
+    return((double)CUDD_OUT_OF_MEM);
+  }
+
+  *ppaths = paths;
+
+  if (st_add_direct(table, node, ppaths) == ST_OUT_OF_MEM) {
+    FREE(ppaths);
+    return((double)CUDD_OUT_OF_MEM);
+  }
+  return(paths);
+
+
+  /* printf("ok 1\n"); */
+
+  /* DdNode	*Nv, *Nnv; */
+  /* double	paths, *ppaths, paths1, paths2; */
+  /* void	*dummy; */
+
+  /* DdNode * one = Cudd_ReadOne(man); */
+
+  /* printf("checking if constant\n"); */
+  /* if (cuddIsConstant(node)) { */
+  /*   printf("constant\n"); */
+  /*   return 9.0; */
+  /* } */
+  /* printf("not constant, looking up \n"); */
+  /* if (st_lookup(table, node, &dummy)) { */
+  /*   paths = *(double *) dummy; */
+  /*   printf("found cached value %f\n", dummy); */
+  /*   return(paths); */
+  /* } */
+  /* printf("ok 2\n"); */
+
+  /* Nv = cuddT(node); Nnv = cuddE(node); */
+
+  /* printf("recursing \n"); */
+  /* paths1 = ddWmcAux(man, Nv, weights, table); */
+  /* paths2 = ddWmcAux(man, Cudd_Regular(Nnv), weights, table); */
+
+  /* printf("ok 3\n"); */
+
+  /* ppaths = ALLOC(double,1); */
+  /* *ppaths = paths; */
+  /* printf("ok 4\n"); */
+  /* return(paths); */
+
+} /* end of ddCountPathAux */
+
+double
+Cudd_Wmc(DdManager * man,
+         double * weights,
+         DdNode * node)
+{
+  
+  st_table	*table;
+  double	i;
+
+  table = st_init_table(st_ptrcmp,st_ptrhash);
+  if (table == NULL) {
+    return((double)CUDD_OUT_OF_MEM);
+  }
+  i = ddWmcAux(man,node,weights,table);
+  /* i = ddWmcAux(node, table); */
+  st_foreach(table, cuddStCountfree, NULL);
+  st_free_table(table);
+  return(i);
+
+}
+
+
+
+
 /**
   @brief Performs the recursive step of Cudd_EpdCountMinterm.
 

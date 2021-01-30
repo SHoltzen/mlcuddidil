@@ -266,6 +266,8 @@ if (_res==(double)CUDD_OUT_OF_MEM){
   caml_failwith(\"Bdd.nbpaths returned CUDD_OUT_OF_MEM\");
 }");
 
+
+
 quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_CountPathsToNonZero}[Cudd_CountPathsToNonZero]}. Number of paths in the BDD from the root to the true leaf. *)")
 double nbtruepaths(bdd__t no)
 quote(call,
@@ -892,3 +894,8 @@ let rec print print_id formatter bdd =
 	  print_id var (print print_id) alors (print print_id) sinon
 
 ")
+
+quote(MLI,"(** {{:http://vlsi.colorado.edu/~fabio/CUDD/cuddExtDet.html#Cudd_ReadPerm}[Cudd_ReadPerm]}. Returns the level of the variable (its order in the BDD) *)")
+   double wmc(man__t man, bdd__t no, double w[])
+   quote(call, "_res = Cudd_Wmc(man->man, w, no.node);");
+
